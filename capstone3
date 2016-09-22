@@ -1,21 +1,44 @@
 library(data.table)
+bi=fread("C:\\Users\\Daxing\\Desktop\\bi.csv")
+bitop=bi[order(bi$Frequency,decreasing=T),]
+bitop=bitop[Frequency>1]
+bitop$word1=sapply(strsplit(bitop$name," "),'[',1)
+bitop$word2=sapply(strsplit(bitop$name," "),'[',2)
+bigram=cbind(bitop$word1,bitop$word2)
+colnames(bigram)=c("words","prediction")
+bigram=data.table(bigram)
+bigram$N=1
+bigram[,cumN:=cumsum(N),by=words]
+big=bigram[cumN<6,1:2,with=F]
+write.csv(big,"big.csv")
+
+quan=fread("C:\\Users\\Daxing\\Desktop\\quan.csv")
+quantop=quan[order(quan$Frequency,decreasing=T),]
+##quantop=quantop[Frequency>1]
+quantop$word1=sapply(strsplit(quantop$name," "),'[',1)
+quantop$word2=sapply(strsplit(quantop$name," "),'[',2)
+quantop$word3=sapply(strsplit(quantop$name," "),'[',3)
+quantop$word4=sapply(strsplit(quantop$name," "),'[',4)
+quantop$threeword=paste(quantop$word1,quantop$word2,quantop$word3,sep=" ")
+quangram=cbind(quantop$threeword,quantop$word4)
+colnames(quangram)=c("words","prediction")
+quangram=data.table(quangram)
+quangram$N=1
+quangram[,cumN:=cumsum(N),by=words]
+quang=quangram[cumN<6,1:2,with=F]
+write.csv(quang,"quang.csv")
+
 tri=fread("C:\\Users\\Daxing\\Desktop\\tri.csv")
 tritop=tri[order(tri$Frequency,decreasing=T),]
+tritop=tritop[Frequency>1]
 tritop$word1=sapply(strsplit(tritop$name," "),'[',1)
 tritop$word2=sapply(strsplit(tritop$name," "),'[',2)
 tritop$word3=sapply(strsplit(tritop$name," "),'[',3)
 tritop$twoword=paste(tritop$word1,tritop$word2,sep=" ")
-trigram=as.data.frame(cbind(tritop$twoword,tritop$word3))
-trig=NULL
-trig$V1=NULL
-trig$V2=NULL
-for(i in 1:nrow(trigram)){
-  if(i%%1000==1)t=Sys.time()
-  if(i%%1000==0){print(Sys.time()-t)
-  cat("\n")}
-  if(sum(trig$V1%in%trigram$V1[i])<5){
-    trig=rbind(trig,trigram[i,])
-  }
-  else trigram=trigram[!(trigram$V1%in%trigram$V1[i]),]
-  
-}
+trigram=cbind(tritop$twoword,tritop$word3)
+colnames(trigram)=c("words","prediction")
+trigram=data.table(trigram)
+trigram$N=1
+trigram[,cumN:=cumsum(N),by=words]
+trig=trigram[cumN<6,1:2,with=F]
+write.csv(trig,"trig.csv")
