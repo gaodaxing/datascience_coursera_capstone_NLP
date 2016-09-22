@@ -1,0 +1,21 @@
+library(data.table)
+tri=fread("C:\\Users\\Daxing\\Desktop\\tri.csv")
+tritop=tri[order(tri$Frequency,decreasing=T),]
+tritop$word1=sapply(strsplit(tritop$name," "),'[',1)
+tritop$word2=sapply(strsplit(tritop$name," "),'[',2)
+tritop$word3=sapply(strsplit(tritop$name," "),'[',3)
+tritop$twoword=paste(tritop$word1,tritop$word2,sep=" ")
+trigram=as.data.frame(cbind(tritop$twoword,tritop$word3))
+trig=NULL
+trig$V1=NULL
+trig$V2=NULL
+for(i in 1:nrow(trigram)){
+  if(i%%1000==1)t=Sys.time()
+  if(i%%1000==0){print(Sys.time()-t)
+  cat("\n")}
+  if(sum(trig$V1%in%trigram$V1[i])<5){
+    trig=rbind(trig,trigram[i,])
+  }
+  else trigram=trigram[!(trigram$V1%in%trigram$V1[i]),]
+  
+}
