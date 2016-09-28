@@ -1,0 +1,139 @@
+suppressWarnings(library(tm))
+suppressWarnings(library(RWeka))
+library(rJava)
+library(SnowballC)
+path='/Users/daxinggao/Downloads/final 2/en_US'
+path1=file.path(path,"en_US.blogs.txt")
+path2=file.path(path,"en_US.news.txt")
+path3=file.path(path,"en_US.twitter.txt")
+fh1=file(path1,open="r")
+fh2=file(path2,open="r")
+fh3=file(path3,open="r")
+
+set.seed(1)
+F1=readLines(fh1,warn=F)
+F1=sample(F1,as.integer(NROW(F1)*0.5),replace=F)
+close(fh1)
+F1=iconv(F1,"latin1", "ASCII", sub="")
+
+F2=readLines(fh2,warn=F)
+set.seed(1)
+F2=sample(F2,as.integer(NROW(F2)*0.5),replace=F)
+close(fh2)
+F2=iconv(F2,"latin1", "ASCII", sub="")
+
+F3=readLines(fh3,warn=F)
+set.seed(1)
+F3=sample(F3,as.integer(NROW(F3)*0.5),replace=F)
+close(fh3)
+F3=iconv(F3,"latin1", "ASCII", sub="")##remove emoji from twitter
+
+fprofane=file("/Users/daxinggao/Desktop/profanity.txt")
+profane=VectorSource(readLines(fprofane,warn=F))
+close(fprofane)
+removeURL <- function(x) gsub("(ht|f)tp[[:alnum:][:punct:]]*", "", x)
+removeshortword<-function(x)gsub("(\\s|^)([a-z]{1,2}(\\s|$))+"," ",x)
+removeEmail<-function(x)gsub("[[:alnum:][:punct:]]*@[[:alnum:][:punct:]]*","",x)
+removeWWW<-function(x)gsub("www\\.[[:alnum:][:punct:]]*","",x)
+removehastag<-function(x)gsub("\\#[[:alnum:][:punct:]]*","",x)
+removerepeatletter<-function(x)gsub("([[:alpha:]])\\1{2,}","\\1",x)
+replacepunctuation<-function(x)gsub("[[:punct:]]+"," ",x)
+shownot<-function(x)gsub("n\\'t"," not",x)
+
+unifreq=NULL
+bifreq=NULL
+trifreq=NULL
+quanfreq=NULL
+options(mc.cores=1)
+
+parsegram<-function(gram,n,sparse){
+
+for (i in 1:n){
+  
+  cat("This is the ",i,"th corpus\n")
+  t=Sys.time()
+  f1=F1[as.integer((NROW(F1)/n*(i-1))+1):as.integer(NROW(F1)/n*i)]
+  f2=F2[as.integer((NROW(F2)/n*(i-1))+1):as.integer(NROW(F2)/n*i)]
+  f3=F3[as.integer((NROW(F3)/n*(i-1))+1):as.integer(NROW(F3)/n*i)]
+  
+  docs=Corpus(VectorSource(c(f1,f2,f3)))
+  docs=tm_map(docs,content_transformer(tolower))
+  docs=tm_map(docs, content_transformer(removeURL))
+  docs=tm_map(docs, content_transformer(removeEmail))
+  docs=tm_map(docs, content_transformer(removehastag))
+  docs=tm_map(docs, content_transformer(removeWWW))
+  
+  docs=tm_map(docs,stripWhitespace)
+  docs=tm_map(docs, content_transformer(removerepeatletter))
+  docs=tm_map(docs,removeWords,c(stopwords("english"),"can","will"))
+  docs=tm_map(docs,removeWords,profane$content[-1])
+  
+  docs=tm_map(docs,content_transformer(replacepunctuation))
+  docs=tm_map(docs, removeNumbers)
+  docs=tm_map(docs, content_transformer(removeshortword))
+  ##docs=tm_map(docs,content_transformer(shownot))
+  docs=tm_map(docs,stripWhitespace)
+  ##docs=tm_map(docs,content_transformer(correctmis))
+  ##docs=tm_map(docs, stemDocument)
+  docs=tm_map(docs,PlainTextDocument)
+  
+  if(gram==1){
+  
+  UnigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 1, max = 1))##build unigram
+  tdm1<-TermDocumentMatrix(docs,control = list(tokenize=UnigramTokenizer))
+  tdm1=removeSparseTerms(tdm1,sparse)##remove sparse term
+  tdm1m<-as.matrix(tdm1)
+  tdm1_hf=as.data.frame(cbind(name=row.names(tdm1),Frequency=rowSums(tdm1m)))
+  unifreq=rbind(unifreq,tdm1_hf)
+  unifreq$Frequency=as.numeric(unifreq$Frequency)#calculate unigram frequency
+  unifreq=aggregate(Frequency~name,unifreq,FUN=sum)
+  write.csv(unifreq,"uni_http_N.csv")
+  }
+  
+  else if(gram==2){
+  
+  BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))##build bigram
+  tdm2<-TermDocumentMatrix(docs,control = list(tokenize=BigramTokenizer))
+  tdm2=removeSparseTerms(tdm2,1-sparse)##remove sparse term
+  tdm2m<-as.matrix(tdm2)
+  cat(nrow(tdm2m))
+  tdm2_hf=as.data.frame(cbind(name=row.names(tdm2),Frequency=rowSums(tdm2m)))
+  bifreq=rbind(bifreq,tdm2_hf)
+  bifreq$Frequency=as.numeric(bifreq$Frequency)#calculate unigram frequency
+  bifreq=aggregate(Frequency~name,bifreq,FUN=sum)
+  cat("size is ",object.size(bifreq)/1024^2," MB\n")
+  cat("It has ",nrow(bifreq)," rows\n")
+  write.csv(bifreq,"bi_http_N.csv")
+  if(object.size(bifreq)>=(100*1024^2))break
+  
+  
+  }
+  
+  else if(gram==3){
+  TrigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))##build trigram
+  tdm3<-TermDocumentMatrix(docs,control = list(tokenize=TrigramTokenizer))
+  tdm3=removeSparseTerms(tdm3,sparse)##remove sparse term
+  tdm3m<-as.matrix(tdm3)
+  tdm3_hf=as.data.frame(cbind(name=row.names(tdm3),Frequency=rowSums(tdm3m)))
+  trifreq=rbind(trifreq,tdm3_hf)
+  trifreq$Frequency=as.numeric(trifreq$Frequency)#calculate unigram frequency
+  trifreq=aggregate(Frequency~name,trifreq,FUN=sum)
+  write.csv(trifreq,"tri_http_N.csv")
+  }
+  
+  else if(gram==4){
+  QuangramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 4, max = 4))
+  tdm4<-TermDocumentMatrix(docs,control = list(tokenize=QuangramTokenizer))
+  tdm4=removeSparseTerms(tdm4,sparse)##remove sparse term
+  tdm4m<-as.matrix(tdm4)
+  tdm4_hf=as.data.frame(cbind(name=row.names(tdm4),Frequency=rowSums(tdm4m)))
+  quanfreq=rbind(quanfreq,tdm4_hf)
+  quanfreq$Frequency=as.numeric(quanfreq$Frequency)#calculate unigram frequency
+  quanfreq=aggregate(Frequency~name,quanfreq,FUN=sum)
+  write.csv(quanfreq,"quan_http_N.csv")
+}
+  print(Sys.time()-t)
+  
+}
+}
+
