@@ -136,4 +136,8 @@ for (i in 1:n){
   
 }
 }
-
+a=sparseMatrix(i=tdm2$i, j=tdm2$j, x=tdm2$v)
+b=rowSums(a)
+c=cbind(tdm2$dimnames$Terms,b)
+c=data.table(c)
+object.size(c[b>1])/1024^2
