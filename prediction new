@@ -1,0 +1,61 @@
+library(data.table)
+bi=fread("C:\\Users\\Daxing\\Desktop\\bi.csv")
+bitop=bi[order(bi$Frequency,decreasing=T),]
+bitop=bitop[Frequency>1]
+bitop$word1=sapply(strsplit(bitop$name," "),'[',1)
+bitop$word2=sapply(strsplit(bitop$name," "),'[',2)
+bigram=cbind(bitop$word1,bitop$word2)
+colnames(bigram)=c("words","prediction")
+bigram=data.table(bigram)
+bigram$N=1
+bigram[,cumN:=cumsum(N),by=words]
+big=bigram[cumN<6,1:2,with=F]
+write.csv(big,"big.csv")
+
+quan=fread("quan_http_N.csv")
+quan=quan[,2:3,with=F]
+names(quan)=c("quan_gram","Frequency")
+quan$tri_gram=sapply(strsplit(quan$quan_gram," "),function(x){paste(x[1],x[2],x[3],sep=" ")})
+quan$prediction=sapply(strsplit(quan$quan_gram," "),'[',4)
+
+tri=fread("tri_http_N.csv")
+tri=tri[,2:3,with=F]
+names(tri)=c("tri_gram","Frequency")
+tri$bi_gram=sapply(strsplit(tri$tri_gram," "),function(x){paste(x[1],x[2],sep=" ")})
+tri$prediction=sapply(strsplit(tri$tri_gram," "),'[',3)
+
+bi=fread("bi_http_N1.csv")
+bi=bi[,2:3,with=F]
+names(bi)=c("bi_gram","Frequency")
+bi$uni_gram=sapply(strsplit(bi$bi_gram," "),'[',1)
+bi$prediction=sapply(strsplit(bi$bi_gram," "),'[',2)
+                     
+uni=fread("uni_http_N.csv")
+uni=uni[,2:3,with=F]
+names(uni)=c("uni_gram","Frequency")
+
+setkey(bi,uni_gram)
+setkey(uni,uni_gram)
+bim=uni[bi]
+bim$p=as.numeric(bim$i.Frequency)/as.numeric(bim$Frequency)
+N_gram2=bim[,c(1,5,6),with=F]
+N_gram2$p=N_gram2$p*0.04*0.04
+names(N_gram2)=c("N_gram","prediction","p")
+
+setkey(tri,bi_gram)
+setkey(bi,bi_gram)
+trim=bi[tri]
+trim$p=as.numeric(trim$i.Frequency)/as.numeric(trim$Frequency)
+N_gram3=trim[,c(1,7,8),with=F]
+N_gram3$p=N_gram3$p*0.04
+names(N_gram3)=c("N_gram","prediction","p")
+
+setkey(quan,tri_gram)
+setkey(tri,tri_gram)
+quanm=tri[quan]
+quanm$p=as.numeric(quanm$i.Frequency)/as.numeric(quanm$Frequency)
+N_gram4=quanm[,c(1,7,8),with=F]
+names(N_gram4)=c("N_gram","prediction","p")
+
+N_gram=rbind(N_gram4,N_gram3,N_gram2)
+
