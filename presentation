@@ -1,0 +1,60 @@
+---
+title       : Word prediction
+subtitle    : 
+author      : Daxing Gao
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Read-And-Delete
+
+1. Edit YAML front matter
+2. Write using R Markdown
+3. Use an empty line followed by three dashes to separate slides!
+
+--- .class #id 
+
+## Slide 2
+I used 2-grams to 5-grams, drawn from ~12,000 lines of English from blogs, news articles and Twitter.
+I cleaned the text to remove things like punctuation
+
+--- .class #id 
+
+Word prediction algorythm
+
+“Backing-off”“ to Milestone report the algorythmic part were changed a bit and final WordPredict Application implements the following logic:
+
+    App is reading the input after "Submit” button is pressed.
+    Preprocessing input (lowering case, remove punctuation, trim white spaces, etc.)
+    Looking up for all possible endings (among 2- and 3-grams)
+    Backing-of to the lower-grams applying reduction factor (0.4 for 2-grams, 0.16 for top unigrams).
+    Put all predictions together, sort desc by probability and show the top-5 predicted words.
+    If nothing found - the most common unigram “the” will be shown.
+
+
+--- .class #id 
+## Slide 3
+
+How the app works:
+
+    User inputs a phrase (as many words as she wants)
+    App looks at the last 1-4 words in phrase
+    App checks the database for phrases that match
+    App gathers all the possible predicted words and displays the most likely one
+
+How to use the app:
+
+    Classic mode: Type into the text field, and click the button to see the predicted next word.
+    
+--- .class #id 
+
+## Slide 4  
+    User Interface Overview
+    
+
+
