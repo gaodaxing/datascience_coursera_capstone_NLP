@@ -1,6 +1,5 @@
 library(shiny)
 
-
 shinyUI(fluidPage(
   titlePanel("Word prediction"),
   
@@ -17,6 +16,8 @@ shinyUI(fluidPage(
   mainPanel(
     h3("Please enter your sentence"),
     textInput("sentence",label="sentence"),
+    actionButton("submit", "predict"),
+    actionButton("submit", "predict with candidates"),
     textOutput("hints"),
     h3("Suggested next word:"),
     textOutput("outputtext"),
