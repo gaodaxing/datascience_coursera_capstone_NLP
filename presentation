@@ -1,56 +1,50 @@
----
-title       : Next word prediction app
-subtitle    : Coursera capstone project
-author      : Daxing Gao
-job         : 
-framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
-highlighter : highlight.js  # {highlight.js, prettify, highlight}
-hitheme     : tomorrow      # 
-widgets     : []            # {mathjax, quiz, bootstrap}
-mode        : selfcontained # {standalone, draft}
-knit        : slidify::knit2slides
----
+presentation
+========================================================
+author: Daxing Gao
+date: 10/08/2016
+autosize: true
 
+
+========================================================
 ## Objective
-
 The main goal of this capstone project is to build a shiny application that is able to predict the next word. 
 
---- .class #id 
+## Algorithm
+### Recursively back-off 
 
-## Algorithom and model
-I used 2-grams to 4-grams, drawn from 15% of English from blogs, news articles and Twitter.
-I cleaned the text to remove things like punctuation, profane words, websites and stopwords.
-
---- .class #id 
-
-Word prediction algorythm
-
-    App is reading the input when "Submit” button is pressed or space key is pressed.
-    Preprocessing input (lowering case, remove punctuation, trim white spaces, etc.)
-    Looking up for all possible endings (among N-grams)
-    Backing-of to the lower-grams applying reduction factor (0.4 for 2-grams, 0.16 for top unigrams).
-    Put all predictions together, sort desc by probability and show the top-5 predicted words.
-    If nothing found - the most common stopwords will be shown.
+![](backoff.png)
 
 
---- .class #id 
-## Slide 3
+========================================================
 
-How the app works:
+## Model
 
-    User inputs a phrase (as many words as she wants)
-    App looks at the last 1-4 words in phrase
-    App checks the database for phrases that match
-    App gathers all the possible predicted words and displays the most likely one
+I used 2-grams to 4-grams, drawn from 15% of English from blogs, news articles, and Twitter.
+I cleaned the text to remove things like special character, punctuation, profane words, websites, and stopwords.
+The data was then tokenized into n-grams (2-4 grams). 
+N-gram term frequency matrices were transferred into frequency dictionaries. The possibilities of predicted words were calculated.
 
-How to use the app:
+## How the App works:
 
-    Classic mode: Type into the text field, and click the button to see the predicted next word.
-    
---- .class #id 
+The app is reading the input when "predict" button is pressed or space key is pressed.
+Preprocess input (lowering case, remove unwanted words, remove punctuation, trim white spaces, etc.)
+Look for all possible endings (among N-grams)
+Back-off to the lower-grams applying reduction factor (0.4 for 2-grams, 0.16 for top unigrams).
+Put all predictions together, sort the words by probability and show the top-5 predicted words.
+If nothing is found, the most common stopwords will be shown.
 
-## Slide 4  
-    User Interface Overview
-    
 
+
+========================================================
+## How to use the App
+
+"Prediction without candidates" mode: Type into the text field, and click the button to see the predicted next word.     Or, every time space key is pressed, it will start to predict.
+![](example1.png)    
+
+========================================================
+
+## How to use the App  
+
+"Prediction with candidates" mode: Choose "predict with candidates". Type into the text field, and click the button of "predict with candidates" to see the predicted next word.
+![](example2.png)
 
