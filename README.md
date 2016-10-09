@@ -10,8 +10,6 @@ This repository contains the following files/folders:
 
 1. README.md: This readme.
 2. capstone.R: Creates the data objects from cleaned source files.
-3. ui.R, server.R, helpers.R: Shiny application
-4. capstone.Rpres: R presentation file describing the application.
+3. ui.R, server.R: Shiny application https://daxing.shinyapps.io/prediction/
+4. presentation: R presentation file describing the application. http://rpubs.com/daxing/capstone
 5. milestone.Rmd: Project milestone report.
-6. data: Folder of data objects for Shiny application.
-7. capstone.jpg, capstoneUsing.jpg: Images for R presentation.
