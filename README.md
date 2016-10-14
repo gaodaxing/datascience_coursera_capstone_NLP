@@ -13,5 +13,6 @@ This repository contains the following files/folders:
 3. ui.R, server.R: Shiny application https://daxing.shinyapps.io/prediction/
 4. presentation: R presentation file describing the application. http://rpubs.com/daxing/capstone
 5. Project milestone report. https://rpubs.com/daxing/206680
-6. prepocessing: process corpus from twitter, blogs and news into N grams
-7. 
+6. N gram parsing new: process corpus from twitter, blogs and news into N grams
+7. pocessing new: calculate the frequency and possibility of N-gram prediction
+8. prediction new: predict next word by N-gram back-off model
