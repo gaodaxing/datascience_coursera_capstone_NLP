@@ -12,4 +12,6 @@ This repository contains the following files/folders:
 2. capstone.R: Creates the data objects from cleaned source files.
 3. ui.R, server.R: Shiny application https://daxing.shinyapps.io/prediction/
 4. presentation: R presentation file describing the application. http://rpubs.com/daxing/capstone
-5. milestone.Rmd: Project milestone report.
+5. Project milestone report. https://rpubs.com/daxing/206680
+6. prepocessing: process corpus from twitter, blogs and news into N grams
+7. 
